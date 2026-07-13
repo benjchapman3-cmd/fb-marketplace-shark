@@ -81,6 +81,9 @@
   .kpi.live .v{color:var(--green)}
   .scanline{width:100%;font-size:12px;color:var(--muted);margin-top:2px}
   .scanline b{color:var(--text);font-weight:600}
+  .pblink{align-self:center;font-size:12px;font-weight:600;color:var(--green);
+    text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:7px 12px}
+  .pblink:hover{border-color:var(--green)}
   .theme-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);
     border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:15px;flex:0 0 auto}
   .theme-btn:hover{border-color:var(--line2);color:var(--text)}
@@ -203,6 +206,7 @@
     </div>
   </div>
   <div class="kpis" id="kpis"></div>
+  <a class="pblink" href="playbook.html">Playbook ↗</a>
   <button class="theme-btn" id="themeBtn" title="Toggle theme">◐</button>
   <div class="scanline" id="scan">Loading…</div>
 </header>
