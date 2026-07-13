@@ -85,6 +85,16 @@
     border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:15px;flex:0 0 auto}
   .theme-btn:hover{border-color:var(--line2);color:var(--text)}
 
+  /* ---------- P&L ---------- */
+  .pnl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 22px 2px}
+  .pnl .plabel{font-family:"Bricolage Grotesque",sans-serif;font-size:11px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+  .pstat{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:7px 14px}
+  .pstat .k{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .pstat .v{font-family:"IBM Plex Mono",monospace;font-size:16px;font-weight:600;margin-top:1px}
+  .pstat .v.pos{color:var(--green)} .pstat .v.neg{color:var(--red)}
+  .pnl .none{color:var(--muted);font-size:12px}
+
   /* ---------- board ---------- */
   .board{display:flex;gap:14px;padding:18px 22px 40px;overflow-x:auto;
     align-items:flex-start;scroll-snap-type:x proximity}
@@ -197,6 +207,7 @@
   <div class="scanline" id="scan">Loading…</div>
 </header>
 
+<div class="pnl" id="pnl"></div>
 <div class="board" id="board"></div>
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 
@@ -214,6 +225,7 @@ const STAGES=[
 ];
 const SELL_STAGES=["to-list","listed","sold"];
 const money=n=>(n||n===0)?"$"+Number(n).toLocaleString():"—";
+const pstat=(k,v,cls)=>'<div class="pstat"><div class="k">'+k+'</div><div class="v'+(cls?" "+cls:"")+'">'+v+'</div></div>';
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function vClass(v){v=(v||"").toLowerCase();
   if(v.startsWith("buy")||v.startsWith("deal")||v.startsWith("flip"))return"v-good";
@@ -242,6 +254,24 @@ function render(data){
   document.getElementById("scan").innerHTML=
     '<b>'+esc(data.market||"—")+'</b> · updated <b>'+esc((data.updated||"").slice(0,10))+'</b>'+
     (ls.verdict?' &nbsp;·&nbsp; '+esc(ls.verdict):'');
+  // P&L ledger
+  const acq=DEALS.filter(d=>["bought","to-list","listed","sold"].includes(d.stage));
+  const invested=acq.reduce((s,d)=>s+(d.buy_cost??d.ask??0),0);
+  const revenue=soldDeals.reduce((s,d)=>s+(d.sold_price||0),0);
+  const hrs=soldDeals.reduce((s,d)=>s+(d.hours||0),0);
+  const roi=invested?Math.round(profit/invested*100):0;
+  const perHr=hrs?Math.round(profit/hrs):null;
+  const pnlEl=document.getElementById("pnl");
+  if(!acq.length&&!soldDeals.length){
+    pnlEl.innerHTML='<span class="plabel">P&amp;L</span><span class="none">No flips closed yet — populates as deals move Bought → Sold.</span>';
+  }else{
+    pnlEl.innerHTML='<span class="plabel">P&amp;L</span>'+
+      pstat("Invested",money(invested))+
+      pstat("Revenue",money(revenue))+
+      pstat("Net Profit",money(profit),profit<0?"neg":"pos")+
+      pstat("ROI",invested?roi+"%":"—",roi<0?"neg":"pos")+
+      pstat("Avg $/hr",perHr!=null?money(perHr):"—",(perHr!=null&&perHr<0)?"neg":"pos");
+  }
   const board=document.getElementById("board"); board.innerHTML="";
   STAGES.forEach(([key,label,color])=>{
     const items=DEALS.filter(d=>d.stage===key);
