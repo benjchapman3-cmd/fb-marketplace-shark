@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-13T09:00:00",
+  "updated": "2026-07-13T12:32:00",
   "market": "Whitefish, MT (40mi) + nationwide ship",
   "last_scan": {
     "date": "2026-07-13",
@@ -7,7 +7,8 @@
     "terms_run": ["golf irons (local)", "Mizuno JPX (ship)", "Scotty Cameron (ship)", "MacBook Pro M1 Pro (ship)", "Jordan 1 (ship)", "TaylorMade (local)", "Titleist (local)", "MacBook Pro (local)"],
     "verdict": "WHITEFISH LOCAL IS DRY. Local golf = one tiny static ~8-item pool (brand terms return same regional feed, all logged). Local Apple = ZERO MacBooks. National ship exists but research says ship-flips mostly net-negative after fees. 3 items re-scored: 1 personal buy (Ben declined), 2 killed as net-losers.",
     "geographic_insight": "Shark economics favor LOCAL (0% fees) but Whitefish is too thin to produce local deals. The lane unlocks at NYC move (~Jul 20) = dense local market. Until then: rare ship-only on genuinely underpriced personal-priority items.",
-    "note": "Local golf market fully mapped this pass. Not thrashing more brand terms (redundant). Watches/furniture skipped (P2 / pre-NYC)."
+    "note": "Local golf market fully mapped this pass. Not thrashing more brand terms (redundant). Watches/furniture skipped (P2 / pre-NYC).",
+    "scheduled_run_1232": "12:32 cron (scout+inbox, NO sends). Golf-local 3d = noise + 1 youth LH set $100 (skip). Apple-local = 0 MacBooks. extract.js listing_url+thumbnail capture VERIFIED working live. Zero active shark negotiations → nothing in inbox to advance. No new stageable deals — dry, as expected pre-NYC."
   },
   "messages_today": 0,
   "messages_today_date": null,
