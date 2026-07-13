@@ -23,6 +23,19 @@ Autonomy model = **session-autonomous**. Not 24/7 (that's the FB-ban wall — th
 - `shark.command` — double-click launcher: opens the hosted CRM + prints scan triggers.
 - `start.command` — legacy (opens old dashboard.html).
 
+## Automation & cadence (4×/day)
+Optimal = **4 runs/day, ~every 3–4h in waking hours** (8:32 / 12:32 / 16:32 / 20:02). More = looks botty + diminishing returns; fewer = lose negotiation momentum. Instant/always-on is NOT possible (no FB push, real-FB automation = ban) and not even desirable (instant = bot signal). Each run = scan + inbox-check + advance + notify.
+
+Three ways it fires:
+1. **In-session crons** — fire the 4×/day scan while a Claude session is alive (die when Claude closes).
+2. **Persistent launchd runner** (`shark-scout.sh` + `~/Library/LaunchAgents/com.ben.shark-scout.plist`) — fires the 4×/day scan **without a session open**. SCOUT-ONLY (no sends). **Disabled by default** — enable at NYC:
+   `launchctl load ~/Library/LaunchAgents/com.ben.shark-scout.plist`
+   ⚠️ Each run spends API tokens (`claude -p`). Headless browser-drive is unverified — check the first real run at NYC.
+3. **Session trigger** — say **"run the shark"** anytime.
+
+### Full autonomous negotiation (the goal) — post-van-sale + NYC, BURNER account
+Ben's target: agent negotiates fully on its own, Ben absent, steps in only for red-flags + final buy. Path: run it on a **burner FB account** (isolates ban risk from the real/van account), enable send-within-mandate on the launchd runner. Async pull-in model = agent negotiates → HOLDS at buy-ready or red-flag → notifies Ben → he confirms whenever (never buys without him). Turns on only AFTER van sells (removes the account-loss stake).
+
 ## Tools in the scan loop
 - **Score step** → get eBay-SOLD R: in-session Chrome opens `ebay.com/sch/i.html?_nkw=<item>&LH_Sold=1&LH_Complete=1`, grab page text, `comp.py --stdin` → median R for the walk math.
 - **Surface step** → `notify.py --deals` fires a Mac notification for live winners (no spamming Ben on dry scans).
