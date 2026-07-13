@@ -3,181 +3,327 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🦈 Marketplace Shark — Deal CRM</title>
+<title>Marketplace Shark — Deal Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0d1117; --panel:#161b22; --panel2:#1c232d; --line:#2a3240;
-    --text:#e6edf3; --muted:#8b98a5; --accent:#3fb950; --accent2:#58a6ff;
-    --warn:#d29922; --bad:#f85149; --chip:#21262d;
+    --ink:#080c11; --ink2:#0d131a; --panel:#111922; --panel2:#16212c;
+    --line:#22303d; --line2:#2c3d4d;
+    --text:#eaf1f7; --muted:#8598a8; --faint:#5d6f7e;
+    --green:#35d69a; --green-dim:rgba(53,214,154,.14);
+    --red:#fb6a5f; --red-dim:rgba(251,106,95,.14);
+    --amber:#f5b451; --amber-dim:rgba(245,180,81,.14);
+    --blue:#5eb0ff; --blue-dim:rgba(94,176,255,.14);
+    --cyan:#3fd0d6;
+    --shadow:0 6px 24px -8px rgba(0,0,0,.6);
+    --radius:14px;
   }
   @media (prefers-color-scheme: light){
-    :root{ --bg:#f6f8fa; --panel:#fff; --panel2:#f0f3f6; --line:#d0d7de;
-      --text:#1f2328; --muted:#636c76; --chip:#eaeef2; }
+    :root:not([data-theme]){
+      --ink:#eef1f0; --ink2:#e7ebea; --panel:#ffffff; --panel2:#f5f8f7;
+      --line:#dce4e3; --line2:#c8d3d1;
+      --text:#111a17; --muted:#5c6b66; --faint:#8a9994;
+      --green:#0f9d6a; --green-dim:rgba(15,157,106,.12);
+      --red:#d84a3f; --red-dim:rgba(216,74,63,.12);
+      --amber:#b7791f; --amber-dim:rgba(183,121,31,.14);
+      --blue:#2b7fd6; --blue-dim:rgba(43,127,214,.12);
+      --shadow:0 6px 20px -10px rgba(0,0,0,.25);
+    }
   }
+  :root[data-theme="light"]{
+    color-scheme:light;
+    --ink:#eef1f0; --ink2:#e7ebea; --panel:#ffffff; --panel2:#f5f8f7;
+    --line:#dce4e3; --line2:#c8d3d1;
+    --text:#111a17; --muted:#5c6b66; --faint:#8a9994;
+    --green:#0f9d6a; --green-dim:rgba(15,157,106,.12);
+    --red:#d84a3f; --red-dim:rgba(216,74,63,.12);
+    --amber:#b7791f; --amber-dim:rgba(183,121,31,.14);
+    --blue:#2b7fd6; --blue-dim:rgba(43,127,214,.12);
+    --shadow:0 6px 20px -10px rgba(0,0,0,.25);
+  }
+  :root[data-theme="dark"]{ color-scheme:dark; }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);
-    font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-  header{padding:14px 16px;border-bottom:1px solid var(--line);
-    position:sticky;top:0;background:var(--bg);z-index:5}
-  h1{margin:0;font-size:18px;display:flex;align-items:center;gap:8px}
-  .scan{color:var(--muted);font-size:12px;margin-top:4px}
-  .scan b{color:var(--text)}
-  .board{display:flex;gap:12px;padding:14px;overflow-x:auto;align-items:flex-start;
-    min-height:70vh}
-  .col{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-    min-width:230px;max-width:250px;flex:0 0 auto;display:flex;flex-direction:column}
-  .col h2{margin:0;padding:10px 12px;font-size:12px;letter-spacing:.04em;
-    text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);
-    display:flex;justify-content:space-between}
-  .col .count{background:var(--chip);border-radius:20px;padding:0 8px;color:var(--text)}
-  .cards{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:40px}
-  .card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
-    padding:10px;cursor:pointer;transition:border-color .15s}
-  .card:hover{border-color:var(--accent2)}
-  .card .top{display:flex;gap:8px}
-  .thumb{width:52px;height:52px;border-radius:6px;object-fit:cover;flex:0 0 auto;
-    background:var(--chip);display:flex;align-items:center;justify-content:center;
-    font-size:20px;color:var(--muted)}
-  .card .t{font-weight:600;font-size:13px;margin:0 0 2px}
-  .loc{color:var(--muted);font-size:11px}
-  .nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .pill{font-size:11px;padding:1px 7px;border-radius:20px;background:var(--chip)}
-  .pill.ask{font-weight:700}
-  .verdict{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px}
-  .v-buy,.v-flip{background:rgba(63,185,80,.15);color:var(--accent)}
-  .v-pass{background:rgba(248,81,73,.15);color:var(--bad)}
-  .v-investigate{background:rgba(210,153,34,.15);color:var(--warn)}
-  .cat{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-  .empty{color:var(--muted);font-size:12px;padding:10px;text-align:center}
-  /* modal */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
-    align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;z-index:20}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1100px 500px at 12% -6%, rgba(53,214,154,.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(94,176,255,.08), transparent 55%),
+      var(--ink);
+    color:var(--text);
+    font-family:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:10;
+    padding:18px 22px 16px;
+    background:linear-gradient(var(--ink),rgba(8,12,17,.85));
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;
+  }
+  .brand{display:flex;align-items:center;gap:11px}
+  .fin{font-size:26px;filter:drop-shadow(0 2px 6px rgba(53,214,154,.35))}
+  .wordmark{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-size:22px;letter-spacing:-.02em;line-height:1}
+  .wordmark span{color:var(--green)}
+  .tag{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+  .kpis{display:flex;gap:10px;flex-wrap:wrap}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:7px 13px;min-width:78px}
+  .kpi .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .kpi .v{font-size:17px;font-weight:600;margin-top:1px}
+  .kpi.live .v{color:var(--green)}
+  .scanline{width:100%;font-size:12px;color:var(--muted);margin-top:2px}
+  .scanline b{color:var(--text);font-weight:600}
+  .theme-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:15px;flex:0 0 auto}
+  .theme-btn:hover{border-color:var(--line2);color:var(--text)}
+
+  /* ---------- board ---------- */
+  .board{display:flex;gap:14px;padding:18px 22px 40px;overflow-x:auto;
+    align-items:flex-start;scroll-snap-type:x proximity}
+  .col{flex:0 0 auto;width:262px;scroll-snap-align:start}
+  .col-head{display:flex;align-items:center;justify-content:space-between;
+    padding:2px 4px 10px;position:relative}
+  .col-head::before{content:"";position:absolute;top:-2px;left:4px;width:26px;height:3px;
+    border-radius:3px;background:var(--stage,var(--muted))}
+  .col-title{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:13px;
+    letter-spacing:.02em;text-transform:uppercase;color:var(--text);padding-top:6px}
+  .col-count{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:1px 9px;margin-top:4px}
+  .cards{display:flex;flex-direction:column;gap:10px;min-height:24px}
+  .col-empty{border:1px dashed var(--line);border-radius:12px;color:var(--faint);
+    font-size:12px;text-align:center;padding:14px}
+
+  /* ---------- card ---------- */
+  .card{position:relative;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:13px 13px 12px 15px;cursor:pointer;overflow:hidden;
+    box-shadow:var(--shadow);transition:transform .16s ease,border-color .16s ease,box-shadow .16s;
+    opacity:0;transform:translateY(8px);animation:rise .45s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--vc,var(--muted))}
+  .card:hover{transform:translateY(-3px);border-color:var(--line2);
+    box-shadow:0 14px 30px -12px rgba(0,0,0,.7)}
+  .card-top{display:flex;gap:11px}
+  .thumb{width:46px;height:46px;border-radius:10px;flex:0 0 auto;background:var(--panel2);
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    font-size:19px;object-fit:cover}
+  .card-title{font-weight:600;font-size:13.5px;line-height:1.25;margin:0 0 3px;
+    letter-spacing:-.01em}
+  .card-loc{font-size:11px;color:var(--muted)}
+  .card-cat{font-size:9.5px;color:var(--faint);letter-spacing:.09em;text-transform:uppercase;margin-top:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
+  .chip{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:2px 7px;border-radius:7px;
+    background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+  .chip .cl{color:var(--faint);margin-right:3px}
+  .chip.neg{color:var(--red);border-color:var(--red-dim)}
+  .chip.pos{color:var(--green);border-color:var(--green-dim)}
+  .verdict{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.03em;
+    padding:2px 8px;border-radius:20px;text-transform:uppercase;margin-top:11px}
+  .v-good{background:var(--green-dim);color:var(--green)}
+  .v-pass{background:var(--red-dim);color:var(--red)}
+  .v-invest{background:var(--amber-dim);color:var(--amber)}
+  .v-blue{background:var(--blue-dim);color:var(--blue)}
+  .col.dim .card{opacity:.62}
+  .col.dim .card:hover{opacity:1}
+
+  /* ---------- modal ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(4,7,10,.7);backdrop-filter:blur(4px);
+    display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;z-index:40}
   .overlay.on{display:flex}
-  .modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    max-width:560px;width:100%;padding:18px;margin:auto}
-  .modal h3{margin:0 0 4px;font-size:17px}
-  .modal .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
-  .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
-    padding:6px 10px;font-size:12px}
-  .stat b{display:block;font-size:15px;margin-top:1px}
-  .btn{display:inline-block;background:var(--accent2);color:#fff;text-decoration:none;
-    padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;margin:4px 0}
-  .btn.dim{background:var(--chip);color:var(--muted);pointer-events:none}
-  .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
-    margin:14px 0 6px}
+  .modal{background:var(--panel);border:1px solid var(--line2);border-radius:18px;
+    max-width:540px;width:100%;margin:auto;box-shadow:0 30px 70px -20px rgba(0,0,0,.8);
+    overflow:hidden;animation:pop .2s ease}
+  @keyframes pop{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+  .modal-head{padding:20px 22px 16px;border-bottom:1px solid var(--line);position:relative;
+    background:linear-gradient(180deg,var(--panel2),transparent)}
+  .modal-head::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--vc,var(--muted))}
+  .modal h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:19px;
+    margin:0 0 5px;letter-spacing:-.01em;padding-right:26px}
+  .modal-sub{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .x{position:absolute;top:16px;right:18px;width:28px;height:28px;border-radius:8px;
+    border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;font-size:16px}
+  .x:hover{color:var(--text);border-color:var(--line2)}
+  .modal-body{padding:18px 22px 22px}
+  .statrow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:4px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:8px 13px;flex:1;min-width:84px}
+  .stat .k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .stat .v{font-family:"IBM Plex Mono",monospace;font-size:17px;font-weight:600;margin-top:2px}
+  .stat .v.neg{color:var(--red)} .stat .v.pos{color:var(--green)}
+  .btn{display:inline-flex;align-items:center;gap:7px;background:var(--green);color:#04120c;
+    text-decoration:none;padding:10px 16px;border-radius:11px;font-weight:700;font-size:13px;
+    margin:16px 0 4px;transition:transform .12s,filter .12s}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+  .btn.dim{background:var(--panel2);color:var(--faint);border:1px solid var(--line);
+    pointer-events:none;font-weight:500}
+  .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+    margin:18px 0 7px;display:flex;align-items:center;gap:8px}
+  .lbl::after{content:"";flex:1;height:1px;background:var(--line)}
   .note{font-size:13px;color:var(--text)}
-  .risk{font-size:13px;color:var(--warn)}
-  .convo{display:flex;flex-direction:column;gap:6px}
-  .msg{padding:7px 10px;border-radius:10px;font-size:13px;max-width:85%}
-  .msg.seller{background:var(--panel2);border:1px solid var(--line);align-self:flex-start}
-  .msg.ben{background:rgba(88,166,255,.18);align-self:flex-end}
-  .msg .who{font-size:10px;color:var(--muted);margin-bottom:2px}
-  .x{float:right;cursor:pointer;color:var(--muted);font-size:20px;line-height:1}
-  .err{padding:30px;text-align:center;color:var(--bad)}
+  .risk{font-size:13px;color:var(--amber)}
+  .mandate{display:flex;gap:9px}
+  .mandate .stat .v{font-size:15px}
+  .convo{display:flex;flex-direction:column;gap:7px}
+  .msg{padding:8px 12px;border-radius:13px;font-size:13px;max-width:86%;line-height:1.4}
+  .msg.seller{background:var(--panel2);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.ben{background:var(--green-dim);border:1px solid var(--green-dim);align-self:flex-end;border-bottom-right-radius:4px}
+  .msg .who{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+  .muted-note{color:var(--muted);font-size:13px}
+  .err{padding:50px 24px;text-align:center;color:var(--red)}
+  ::-webkit-scrollbar{height:10px;width:10px}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:20px}
+  ::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body>
 <header>
-  <h1>🦈 Marketplace Shark — Deal CRM</h1>
-  <div class="scan" id="scan">Loading…</div>
+  <div class="brand">
+    <div class="fin">🦈</div>
+    <div>
+      <div class="wordmark">MARKETPLACE&nbsp;<span>SHARK</span></div>
+      <div class="tag">Deal Desk</div>
+    </div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <button class="theme-btn" id="themeBtn" title="Toggle theme">◐</button>
+  <div class="scanline" id="scan">Loading…</div>
 </header>
-<div class="board" id="board"></div>
 
+<div class="board" id="board"></div>
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 
 <script>
 const STAGES=[
-  ["identified","Identified"],["reached-out","Reached Out"],
-  ["negotiating","Negotiating"],["accepted","Accepted"],
-  ["bought","Bought"],["passed","Passed"]
+  ["identified","Identified","var(--blue)"],
+  ["reached-out","Reached Out","var(--cyan)"],
+  ["negotiating","Negotiating","var(--amber)"],
+  ["accepted","Accepted","var(--green)"],
+  ["bought","Bought","var(--green)"],
+  ["passed","Passed","var(--faint)"]
 ];
 const money=n=>(n||n===0)?"$"+Number(n).toLocaleString():"—";
-const esc=s=>String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-function verdictClass(v){v=(v||"").toLowerCase();
-  if(v.startsWith("buy"))return"v-buy"; if(v.startsWith("flip"))return"v-flip";
-  if(v.startsWith("pass"))return"v-pass"; return"v-investigate";}
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function vClass(v){v=(v||"").toLowerCase();
+  if(v.startsWith("buy")||v.startsWith("deal")||v.startsWith("flip"))return"v-good";
+  if(v.startsWith("pass"))return"v-pass";
+  if(v.startsWith("invest"))return"v-invest"; return"v-blue";}
+function vColor(v){v=(v||"").toLowerCase();
+  if(v.startsWith("buy")||v.startsWith("deal")||v.startsWith("flip"))return"var(--green)";
+  if(v.startsWith("pass"))return"var(--red)";
+  if(v.startsWith("invest"))return"var(--amber)"; return"var(--blue)";}
 
-let DEALS=[];
 fetch("deals.json?"+Date.now()).then(r=>r.json()).then(render)
   .catch(e=>{document.getElementById("board").innerHTML=
     '<div class="err">Could not load deals.json<br>'+esc(e.message)+'</div>';});
 
+let DEALS=[];
 function render(data){
   DEALS=data.deals||[];
+  const live=DEALS.filter(d=>d.stage!=="passed");
+  const tracked=live.reduce((s,d)=>s+(d.comp||d.ask||0),0);
+  document.getElementById("kpis").innerHTML=
+    '<div class="kpi live"><div class="k">Live</div><div class="v mono">'+live.length+'</div></div>'+
+    '<div class="kpi"><div class="k">Passed</div><div class="v mono">'+DEALS.filter(d=>d.stage==="passed").length+'</div></div>'+
+    '<div class="kpi"><div class="k">Tracked</div><div class="v mono">'+money(tracked)+'</div></div>';
   const ls=data.last_scan||{};
   document.getElementById("scan").innerHTML=
-    'Market: <b>'+esc(data.market||"—")+'</b> · Updated <b>'+esc((data.updated||"").slice(0,10))+
-    '</b> · '+DEALS.length+' deals'+
-    (ls.verdict?'<br>Last scan: '+esc(ls.verdict):'');
+    '<b>'+esc(data.market||"—")+'</b> · updated <b>'+esc((data.updated||"").slice(0,10))+'</b>'+
+    (ls.verdict?' &nbsp;·&nbsp; '+esc(ls.verdict):'');
   const board=document.getElementById("board"); board.innerHTML="";
-  STAGES.forEach(([key,label])=>{
+  STAGES.forEach(([key,label,color])=>{
     const items=DEALS.filter(d=>d.stage===key);
-    const col=document.createElement("div"); col.className="col";
-    col.innerHTML='<h2>'+label+'<span class="count">'+items.length+'</span></h2>';
+    const col=document.createElement("div");
+    col.className="col"+(key==="passed"?" dim":"");
+    col.style.setProperty("--stage",color);
+    col.innerHTML='<div class="col-head"><span class="col-title">'+label+'</span>'+
+      '<span class="col-count">'+items.length+'</span></div>';
     const wrap=document.createElement("div"); wrap.className="cards";
-    if(!items.length) wrap.innerHTML='<div class="empty">—</div>';
-    items.forEach((d,i)=>wrap.appendChild(cardEl(d)));
+    if(!items.length) wrap.innerHTML='<div class="col-empty">empty</div>';
+    items.forEach((d,i)=>wrap.appendChild(cardEl(d,i)));
     col.appendChild(wrap); board.appendChild(col);
   });
 }
 
-function cardEl(d){
+function cardEl(d,i){
   const el=document.createElement("div"); el.className="card";
-  const thumb=d.thumbnail?'<img class="thumb" src="'+esc(d.thumbnail)+'" alt="">'
-    :'<div class="thumb">📦</div>';
-  el.innerHTML='<div class="top">'+thumb+'<div>'+
-      '<p class="t">'+esc(d.title)+'</p>'+
-      '<div class="loc">'+esc(d.location||"")+'</div>'+
-      '<div class="cat">'+esc(d.category||"")+'</div>'+
+  el.style.setProperty("--vc",vColor(d.verdict));
+  el.style.animationDelay=(i*0.05)+"s";
+  const thumb=d.thumbnail?'<img class="thumb" src="'+esc(d.thumbnail)+'" alt="">':'<div class="thumb">📦</div>';
+  const netChip=d.margin_est!=null
+    ?'<span class="chip '+(d.margin_est<0?"neg":"pos")+'"><span class="cl">net</span>'+money(d.margin_est)+'</span>':'';
+  el.innerHTML='<div class="card-top">'+thumb+'<div>'+
+      '<p class="card-title">'+esc(d.title)+'</p>'+
+      '<div class="card-loc">'+esc(d.location||"")+'</div>'+
+      '<div class="card-cat">'+esc(d.category||"")+'</div>'+
     '</div></div>'+
-    '<div class="nums">'+
-      '<span class="pill ask">ask '+money(d.ask)+'</span>'+
-      (d.comp?'<span class="pill">comp '+money(d.comp)+'</span>':'')+
-      (d.mandate&&d.mandate.walk?'<span class="pill">walk '+money(d.mandate.walk)+'</span>':'')+
-      (d.margin_est!=null?'<span class="pill">net '+money(d.margin_est)+'</span>':'')+
-      '<span class="verdict '+verdictClass(d.verdict)+'">'+esc(d.verdict||"?")+'</span>'+
-    '</div>';
+    '<div class="chips">'+
+      '<span class="chip"><span class="cl">ask</span>'+money(d.ask)+'</span>'+
+      (d.comp?'<span class="chip"><span class="cl">comp</span>'+money(d.comp)+'</span>':'')+
+      (d.mandate&&d.mandate.walk?'<span class="chip"><span class="cl">walk</span>'+money(d.mandate.walk)+'</span>':'')+
+      netChip+
+    '</div>'+
+    '<span class="verdict '+vClass(d.verdict)+'">'+esc(d.verdict||"?")+'</span>';
   el.onclick=()=>openModal(d);
   return el;
 }
 
 function openModal(d){
   const m=document.getElementById("modal");
+  m.style.setProperty("--vc",vColor(d.verdict));
   const conv=(d.conversation&&d.conversation.length)
-    ? '<div class="convo">'+d.conversation.map(c=>
-        '<div class="msg '+(c.from==="ben"?"ben":"seller")+'">'+
-        '<div class="who">'+esc(c.from==="ben"?"You":"Seller")+
-        (c.ts?" · "+esc(c.ts):"")+'</div>'+esc(c.text)+'</div>').join("")+'</div>'
-    : '<div class="note" style="color:var(--muted)">No conversation logged yet. The Shark logs the thread here once it negotiates.</div>';
+    ?'<div class="convo">'+d.conversation.map(c=>
+      '<div class="msg '+(c.from==="ben"?"ben":"seller")+'"><div class="who">'+
+      esc(c.from==="ben"?"You":"Seller")+(c.ts?" · "+esc(c.ts):"")+'</div>'+esc(c.text)+'</div>').join("")+'</div>'
+    :'<div class="muted-note">No conversation logged yet — the Shark logs the thread here once it negotiates.</div>';
   const link=d.listing_url
-    ? '<a class="btn" href="'+esc(d.listing_url)+'" target="_blank" rel="noopener">↗ Open listing on Facebook</a>'
-    : '<span class="btn dim">Listing link not captured yet</span>';
+    ?'<a class="btn" href="'+esc(d.listing_url)+'" target="_blank" rel="noopener">↗ Open listing on Facebook</a>'
+    :'<span class="btn dim">Listing link not captured yet</span>';
   const man=d.mandate
-    ? '<div class="row"><div class="stat">Open<b>'+money(d.mandate.open)+'</b></div>'+
-      '<div class="stat">Target<b>'+money(d.mandate.target)+'</b></div>'+
-      '<div class="stat">Walk<b>'+money(d.mandate.walk)+'</b></div></div>'
-    : '';
-  m.innerHTML='<span class="x" onclick="closeModal()">×</span>'+
-    '<h3>'+esc(d.title)+'</h3>'+
-    '<div class="sub">'+esc(d.location||"")+' · '+esc(d.category||"")+
-      ' · <span class="verdict '+verdictClass(d.verdict)+'">'+esc(d.verdict||"?")+'</span></div>'+
-    '<div class="row">'+
-      '<div class="stat">Ask<b>'+money(d.ask)+'</b></div>'+
-      (d.comp?'<div class="stat">Comp R<b>'+money(d.comp)+'</b></div>':'')+
-      (d.margin_est!=null?'<div class="stat">Est net<b>'+money(d.margin_est)+'</b></div>':'')+
-    '</div>'+
-    link+
-    (d.comp_source?'<div class="lbl">Comp source</div><div class="note">'+esc(d.comp_source)+'</div>':'')+
-    (man?'<div class="lbl">Mandate</div>'+man:'')+
-    (d.condition_risk?'<div class="lbl">Condition / risk</div><div class="risk">'+esc(d.condition_risk)+'</div>':'')+
-    (d.notes?'<div class="lbl">Notes</div><div class="note">'+esc(d.notes)+'</div>':'')+
-    '<div class="lbl">Conversation</div>'+conv;
+    ?'<div class="mandate"><div class="stat"><div class="k">Open</div><div class="v">'+money(d.mandate.open)+'</div></div>'+
+     '<div class="stat"><div class="k">Target</div><div class="v">'+money(d.mandate.target)+'</div></div>'+
+     '<div class="stat"><div class="k">Walk</div><div class="v">'+money(d.mandate.walk)+'</div></div></div>':'';
+  m.innerHTML=
+    '<div class="modal-head"><button class="x" onclick="closeModal()">×</button>'+
+      '<h3>'+esc(d.title)+'</h3>'+
+      '<div class="modal-sub">'+esc(d.location||"")+' · '+esc(d.category||"")+
+      ' · <span class="verdict '+vClass(d.verdict)+'" style="margin:0">'+esc(d.verdict||"?")+'</span></div></div>'+
+    '<div class="modal-body">'+
+      '<div class="statrow">'+
+        '<div class="stat"><div class="k">Ask</div><div class="v">'+money(d.ask)+'</div></div>'+
+        (d.comp?'<div class="stat"><div class="k">Comp R</div><div class="v">'+money(d.comp)+'</div></div>':'')+
+        (d.margin_est!=null?'<div class="stat"><div class="k">Est net</div><div class="v '+(d.margin_est<0?"neg":"pos")+'">'+money(d.margin_est)+'</div></div>':'')+
+      '</div>'+
+      link+
+      (d.comp_source?'<div class="lbl">Comp source</div><div class="note">'+esc(d.comp_source)+'</div>':'')+
+      (man?'<div class="lbl">Mandate</div>'+man:'')+
+      (d.condition_risk?'<div class="lbl">Condition · risk</div><div class="risk">'+esc(d.condition_risk)+'</div>':'')+
+      (d.notes?'<div class="lbl">Notes</div><div class="note">'+esc(d.notes)+'</div>':'')+
+      '<div class="lbl">Conversation</div>'+conv+
+    '</div>';
   document.getElementById("overlay").classList.add("on");
 }
 function closeModal(){document.getElementById("overlay").classList.remove("on");}
 document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay")closeModal();};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+// theme toggle (persist)
+const root=document.documentElement;
+const saved=localStorage.getItem("shark-theme");
+if(saved) root.setAttribute("data-theme",saved);
+document.getElementById("themeBtn").onclick=()=>{
+  const cur=root.getAttribute("data-theme");
+  const next = cur==="light" ? "dark" : (cur==="dark" ? "light" :
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "light":"dark"));
+  root.setAttribute("data-theme",next); localStorage.setItem("shark-theme",next);
+};
 </script>
 </body>
 </html>

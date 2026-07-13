@@ -24,8 +24,12 @@ Autonomy model = **session-autonomous**. Not 24/7 (that's the FB-ban wall — th
 2. **Filter.** Kill anything below the quality bar (off-brand, beat-up, dated game-improvement). Premium brands + recent models only.
 3. **Score.** Personal-priority items first (irons set, putter, 3-wood, wedges, high-spec MacBook). Everything else = flip. Compare ask vs benchmark + pull a live eBay-sold comp for flips. Flag ≤ GOOD.
 4. **Draft.** For each hit: write the opener (ask availability + missing specs + condition photos + local/cash) and set the mandate {open ≈ 15–20% under, target, walk = max Ben pays}.
-5. **Record.** Update `deals.json` + regenerate the `DATA` block in `dashboard.html`.
-6. **Surface.** Move real hits to `awaiting-approval` and tell Ben ONLY these. Stay silent on noise.
+5. **Record.** Update `deals.json`. Per hit capture `listing_url` (link into the FB listing), `thumbnail` (result image URL), and any `conversation` (transcript, once negotiating). Set `stage` (identified/reached-out/negotiating/accepted/bought/passed).
+6. **Publish.** From `~/fb-marketplace-shark/`: `git add deals.json && git commit -m "scan <date>" && git push` — this refreshes the hosted CRM (https://benjchapman3-cmd.github.io/fb-marketplace-shark/) so Ben sees it on any device.
+7. **Surface.** Move real hits forward and tell Ben ONLY these. Stay silent on noise.
+
+## Deal CRM (hosted)
+`index.html` = Kanban deal board reading `deals.json`, hosted on GitHub Pages: **https://benjchapman3-cmd.github.io/fb-marketplace-shark/** (phone-viewable). Columns = pipeline stages; cards show ask/comp/walk/net + verdict; click a card → listing link + mandate + seller conversation. Public repo — data is world-readable to anyone with the URL.
 
 ## Safety rails (locked)
 - Runs on Ben's real FB (the van-sale account) → human pace, no rapid-fire, no background headless driving.
