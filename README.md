@@ -16,8 +16,14 @@ Autonomy model = **session-autonomous**. Not 24/7 (that's the FB-ban wall — th
 
 ## Files
 - `deals.json` — source-of-truth pipeline record.
-- `dashboard.html` — visual board (data mirrored inline; regenerated each scan).
+- `index.html` — hosted Deal CRM (Kanban + P&L). `dashboard.html` = old, deprecated.
+- `comp.py` — eBay sold-comp median. Browser path: navigate eBay sold-search in Chrome, pipe page text → `python3 comp.py --stdin`. (Server fetch 403s; API upgrade needs eBay App ID.)
+- `notify.py` — native macOS deal alert. `python3 notify.py --deals` summarizes live winners.
 - `start.command` — double-click to open the dashboard.
+
+## Tools in the scan loop
+- **Score step** → get eBay-SOLD R: in-session Chrome opens `ebay.com/sch/i.html?_nkw=<item>&LH_Sold=1&LH_Complete=1`, grab page text, `comp.py --stdin` → median R for the walk math.
+- **Surface step** → `notify.py --deals` fires a Mac notification for live winners (no spamming Ben on dry scans).
 
 ## SCAN PROTOCOL (the brain — Claude follows this every run)
 1. **Discover.** For each category profile in the vault `CONTEXT.md`, run both passes: LOCAL pickup + `deliveryMethod=shipping`. Sort newest, last 1–7 days.
