@@ -19,7 +19,9 @@ Autonomy model = **session-autonomous**. Not 24/7 (that's the FB-ban wall — th
 - `index.html` — hosted Deal CRM (Kanban + P&L). `dashboard.html` = old, deprecated.
 - `comp.py` — eBay sold-comp median. Browser path: navigate eBay sold-search in Chrome, pipe page text → `python3 comp.py --stdin`. (Server fetch 403s; API upgrade needs eBay App ID.)
 - `notify.py` — native macOS deal alert. `python3 notify.py --deals` summarizes live winners.
-- `start.command` — double-click to open the dashboard.
+- `extract.js` — Chrome-console snippet: pulls listing_url + thumbnail + price/title per search card (filters notifications). Run via javascript_tool in the Record step.
+- `shark.command` — double-click launcher: opens the hosted CRM + prints scan triggers.
+- `start.command` — legacy (opens old dashboard.html).
 
 ## Tools in the scan loop
 - **Score step** → get eBay-SOLD R: in-session Chrome opens `ebay.com/sch/i.html?_nkw=<item>&LH_Sold=1&LH_Complete=1`, grab page text, `comp.py --stdin` → median R for the walk math.
@@ -30,7 +32,7 @@ Autonomy model = **session-autonomous**. Not 24/7 (that's the FB-ban wall — th
 2. **Filter.** Kill anything below the quality bar (off-brand, beat-up, dated game-improvement). Premium brands + recent models only.
 3. **Score.** Personal-priority items first (irons set, putter, 3-wood, wedges, high-spec MacBook). Everything else = flip. Compare ask vs benchmark + pull a live eBay-sold comp for flips. Flag ≤ GOOD.
 4. **Draft.** For each hit: write the opener (ask availability + missing specs + condition photos + local/cash) and set the mandate {open ≈ 15–20% under, target, walk = max Ben pays}.
-5. **Record.** Update `deals.json`. Per hit capture `listing_url` (link into the FB listing), `thumbnail` (result image URL), and any `conversation` (transcript, once negotiating). Set `stage` (identified/reached-out/negotiating/accepted/bought/passed).
+5. **Record.** Update `deals.json`. Capture `listing_url` + `thumbnail` by running **`extract.js`** via the Chrome javascript_tool on the search page (returns {url, thumbnail, price, title, location} per card — clickable + visual CRM). Log `conversation` once negotiating. Set `stage`.
 6. **Publish.** From `~/fb-marketplace-shark/`: `git add deals.json && git commit -m "scan <date>" && git push` — this refreshes the hosted CRM (https://benjchapman3-cmd.github.io/fb-marketplace-shark/) so Ben sees it on any device.
 7. **Surface.** Move real hits forward and tell Ben ONLY these. Stay silent on noise.
 
