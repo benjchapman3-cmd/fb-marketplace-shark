@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🦈 Marketplace Shark — Deal CRM</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c232d; --line:#2a3240;
+    --text:#e6edf3; --muted:#8b98a5; --accent:#3fb950; --accent2:#58a6ff;
+    --warn:#d29922; --bad:#f85149; --chip:#21262d;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f6f8fa; --panel:#fff; --panel2:#f0f3f6; --line:#d0d7de;
+      --text:#1f2328; --muted:#636c76; --chip:#eaeef2; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  header{padding:14px 16px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:var(--bg);z-index:5}
+  h1{margin:0;font-size:18px;display:flex;align-items:center;gap:8px}
+  .scan{color:var(--muted);font-size:12px;margin-top:4px}
+  .scan b{color:var(--text)}
+  .board{display:flex;gap:12px;padding:14px;overflow-x:auto;align-items:flex-start;
+    min-height:70vh}
+  .col{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    min-width:230px;max-width:250px;flex:0 0 auto;display:flex;flex-direction:column}
+  .col h2{margin:0;padding:10px 12px;font-size:12px;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between}
+  .col .count{background:var(--chip);border-radius:20px;padding:0 8px;color:var(--text)}
+  .cards{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:40px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    padding:10px;cursor:pointer;transition:border-color .15s}
+  .card:hover{border-color:var(--accent2)}
+  .card .top{display:flex;gap:8px}
+  .thumb{width:52px;height:52px;border-radius:6px;object-fit:cover;flex:0 0 auto;
+    background:var(--chip);display:flex;align-items:center;justify-content:center;
+    font-size:20px;color:var(--muted)}
+  .card .t{font-weight:600;font-size:13px;margin:0 0 2px}
+  .loc{color:var(--muted);font-size:11px}
+  .nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .pill{font-size:11px;padding:1px 7px;border-radius:20px;background:var(--chip)}
+  .pill.ask{font-weight:700}
+  .verdict{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px}
+  .v-buy,.v-flip{background:rgba(63,185,80,.15);color:var(--accent)}
+  .v-pass{background:rgba(248,81,73,.15);color:var(--bad)}
+  .v-investigate{background:rgba(210,153,34,.15);color:var(--warn)}
+  .cat{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .empty{color:var(--muted);font-size:12px;padding:10px;text-align:center}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+    align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;z-index:20}
+  .overlay.on{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    max-width:560px;width:100%;padding:18px;margin:auto}
+  .modal h3{margin:0 0 4px;font-size:17px}
+  .modal .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    padding:6px 10px;font-size:12px}
+  .stat b{display:block;font-size:15px;margin-top:1px}
+  .btn{display:inline-block;background:var(--accent2);color:#fff;text-decoration:none;
+    padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;margin:4px 0}
+  .btn.dim{background:var(--chip);color:var(--muted);pointer-events:none}
+  .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+    margin:14px 0 6px}
+  .note{font-size:13px;color:var(--text)}
+  .risk{font-size:13px;color:var(--warn)}
+  .convo{display:flex;flex-direction:column;gap:6px}
+  .msg{padding:7px 10px;border-radius:10px;font-size:13px;max-width:85%}
+  .msg.seller{background:var(--panel2);border:1px solid var(--line);align-self:flex-start}
+  .msg.ben{background:rgba(88,166,255,.18);align-self:flex-end}
+  .msg .who{font-size:10px;color:var(--muted);margin-bottom:2px}
+  .x{float:right;cursor:pointer;color:var(--muted);font-size:20px;line-height:1}
+  .err{padding:30px;text-align:center;color:var(--bad)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🦈 Marketplace Shark — Deal CRM</h1>
+  <div class="scan" id="scan">Loading…</div>
+</header>
+<div class="board" id="board"></div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+const STAGES=[
+  ["identified","Identified"],["reached-out","Reached Out"],
+  ["negotiating","Negotiating"],["accepted","Accepted"],
+  ["bought","Bought"],["passed","Passed"]
+];
+const money=n=>(n||n===0)?"$"+Number(n).toLocaleString():"—";
+const esc=s=>String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function verdictClass(v){v=(v||"").toLowerCase();
+  if(v.startsWith("buy"))return"v-buy"; if(v.startsWith("flip"))return"v-flip";
+  if(v.startsWith("pass"))return"v-pass"; return"v-investigate";}
+
+let DEALS=[];
+fetch("deals.json?"+Date.now()).then(r=>r.json()).then(render)
+  .catch(e=>{document.getElementById("board").innerHTML=
+    '<div class="err">Could not load deals.json<br>'+esc(e.message)+'</div>';});
+
+function render(data){
+  DEALS=data.deals||[];
+  const ls=data.last_scan||{};
+  document.getElementById("scan").innerHTML=
+    'Market: <b>'+esc(data.market||"—")+'</b> · Updated <b>'+esc((data.updated||"").slice(0,10))+
+    '</b> · '+DEALS.length+' deals'+
+    (ls.verdict?'<br>Last scan: '+esc(ls.verdict):'');
+  const board=document.getElementById("board"); board.innerHTML="";
+  STAGES.forEach(([key,label])=>{
+    const items=DEALS.filter(d=>d.stage===key);
+    const col=document.createElement("div"); col.className="col";
+    col.innerHTML='<h2>'+label+'<span class="count">'+items.length+'</span></h2>';
+    const wrap=document.createElement("div"); wrap.className="cards";
+    if(!items.length) wrap.innerHTML='<div class="empty">—</div>';
+    items.forEach((d,i)=>wrap.appendChild(cardEl(d)));
+    col.appendChild(wrap); board.appendChild(col);
+  });
+}
+
+function cardEl(d){
+  const el=document.createElement("div"); el.className="card";
+  const thumb=d.thumbnail?'<img class="thumb" src="'+esc(d.thumbnail)+'" alt="">'
+    :'<div class="thumb">📦</div>';
+  el.innerHTML='<div class="top">'+thumb+'<div>'+
+      '<p class="t">'+esc(d.title)+'</p>'+
+      '<div class="loc">'+esc(d.location||"")+'</div>'+
+      '<div class="cat">'+esc(d.category||"")+'</div>'+
+    '</div></div>'+
+    '<div class="nums">'+
+      '<span class="pill ask">ask '+money(d.ask)+'</span>'+
+      (d.comp?'<span class="pill">comp '+money(d.comp)+'</span>':'')+
+      (d.mandate&&d.mandate.walk?'<span class="pill">walk '+money(d.mandate.walk)+'</span>':'')+
+      (d.margin_est!=null?'<span class="pill">net '+money(d.margin_est)+'</span>':'')+
+      '<span class="verdict '+verdictClass(d.verdict)+'">'+esc(d.verdict||"?")+'</span>'+
+    '</div>';
+  el.onclick=()=>openModal(d);
+  return el;
+}
+
+function openModal(d){
+  const m=document.getElementById("modal");
+  const conv=(d.conversation&&d.conversation.length)
+    ? '<div class="convo">'+d.conversation.map(c=>
+        '<div class="msg '+(c.from==="ben"?"ben":"seller")+'">'+
+        '<div class="who">'+esc(c.from==="ben"?"You":"Seller")+
+        (c.ts?" · "+esc(c.ts):"")+'</div>'+esc(c.text)+'</div>').join("")+'</div>'
+    : '<div class="note" style="color:var(--muted)">No conversation logged yet. The Shark logs the thread here once it negotiates.</div>';
+  const link=d.listing_url
+    ? '<a class="btn" href="'+esc(d.listing_url)+'" target="_blank" rel="noopener">↗ Open listing on Facebook</a>'
+    : '<span class="btn dim">Listing link not captured yet</span>';
+  const man=d.mandate
+    ? '<div class="row"><div class="stat">Open<b>'+money(d.mandate.open)+'</b></div>'+
+      '<div class="stat">Target<b>'+money(d.mandate.target)+'</b></div>'+
+      '<div class="stat">Walk<b>'+money(d.mandate.walk)+'</b></div></div>'
+    : '';
+  m.innerHTML='<span class="x" onclick="closeModal()">×</span>'+
+    '<h3>'+esc(d.title)+'</h3>'+
+    '<div class="sub">'+esc(d.location||"")+' · '+esc(d.category||"")+
+      ' · <span class="verdict '+verdictClass(d.verdict)+'">'+esc(d.verdict||"?")+'</span></div>'+
+    '<div class="row">'+
+      '<div class="stat">Ask<b>'+money(d.ask)+'</b></div>'+
+      (d.comp?'<div class="stat">Comp R<b>'+money(d.comp)+'</b></div>':'')+
+      (d.margin_est!=null?'<div class="stat">Est net<b>'+money(d.margin_est)+'</b></div>':'')+
+    '</div>'+
+    link+
+    (d.comp_source?'<div class="lbl">Comp source</div><div class="note">'+esc(d.comp_source)+'</div>':'')+
+    (man?'<div class="lbl">Mandate</div>'+man:'')+
+    (d.condition_risk?'<div class="lbl">Condition / risk</div><div class="risk">'+esc(d.condition_risk)+'</div>':'')+
+    (d.notes?'<div class="lbl">Notes</div><div class="note">'+esc(d.notes)+'</div>':'')+
+    '<div class="lbl">Conversation</div>'+conv;
+  document.getElementById("overlay").classList.add("on");
+}
+function closeModal(){document.getElementById("overlay").classList.remove("on");}
+document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay")closeModal();};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+</script>
+</body>
+</html>
