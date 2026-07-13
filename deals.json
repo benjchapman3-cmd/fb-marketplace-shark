@@ -9,8 +9,8 @@
     "geographic_insight": "Shark economics favor LOCAL (0% fees) but Whitefish is too thin to produce local deals. The lane unlocks at NYC move (~Jul 20) = dense local market. Until then: rare ship-only on genuinely underpriced personal-priority items.",
     "note": "Local golf market fully mapped this pass. Not thrashing more brand terms (redundant). Watches/furniture skipped (P2 / pre-NYC)."
   },
-  "stages": ["identified", "reached-out", "negotiating", "accepted", "bought", "passed"],
-  "deal_fields_schema": "Per deal, optional CRM fields: listing_url (str, link into FB listing), thumbnail (str, image URL), conversation (array of {from:'ben'|'seller', text, ts}). Scout captures listing_url+thumbnail going forward; negotiation leg logs conversation.",
+  "stages": ["identified", "reached-out", "negotiating", "accepted", "bought", "to-list", "listed", "sold", "passed"],
+  "deal_fields_schema": "Buy-side: listing_url, thumbnail, conversation[{from,text,ts}]. Sell-side (RESELL-SPEC): list_price, resale_channel, listed_date, sold_price, realized_profit. Scout captures listing_url+thumbnail; negotiation logs conversation; resell loop fills sell-side fields on bought->sold.",
   "deals": [
     {
       "id": "callaway-opus-wedges-kalispell",

@@ -207,8 +207,12 @@ const STAGES=[
   ["negotiating","Negotiating","var(--amber)"],
   ["accepted","Accepted","var(--green)"],
   ["bought","Bought","var(--green)"],
+  ["to-list","To List","var(--amber)"],
+  ["listed","Listed","var(--cyan)"],
+  ["sold","Sold","var(--green)"],
   ["passed","Passed","var(--faint)"]
 ];
+const SELL_STAGES=["to-list","listed","sold"];
 const money=n=>(n||n===0)?"$"+Number(n).toLocaleString():"—";
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function vClass(v){v=(v||"").toLowerCase();
@@ -227,12 +231,13 @@ fetch("deals.json?"+Date.now()).then(r=>r.json()).then(render)
 let DEALS=[];
 function render(data){
   DEALS=data.deals||[];
-  const live=DEALS.filter(d=>d.stage!=="passed");
-  const tracked=live.reduce((s,d)=>s+(d.comp||d.ask||0),0);
+  const live=DEALS.filter(d=>d.stage!=="passed"&&d.stage!=="sold");
+  const soldDeals=DEALS.filter(d=>d.stage==="sold");
+  const profit=soldDeals.reduce((s,d)=>s+(d.realized_profit||0),0);
   document.getElementById("kpis").innerHTML=
     '<div class="kpi live"><div class="k">Live</div><div class="v mono">'+live.length+'</div></div>'+
-    '<div class="kpi"><div class="k">Passed</div><div class="v mono">'+DEALS.filter(d=>d.stage==="passed").length+'</div></div>'+
-    '<div class="kpi"><div class="k">Tracked</div><div class="v mono">'+money(tracked)+'</div></div>';
+    '<div class="kpi"><div class="k">Sold</div><div class="v mono">'+soldDeals.length+'</div></div>'+
+    '<div class="kpi"><div class="k">Net Profit</div><div class="v mono" style="color:'+(profit<0?"var(--red)":"var(--green)")+'">'+money(profit)+'</div></div>';
   const ls=data.last_scan||{};
   document.getElementById("scan").innerHTML=
     '<b>'+esc(data.market||"—")+'</b> · updated <b>'+esc((data.updated||"").slice(0,10))+'</b>'+
@@ -290,6 +295,14 @@ function openModal(d){
     ?'<div class="mandate"><div class="stat"><div class="k">Open</div><div class="v">'+money(d.mandate.open)+'</div></div>'+
      '<div class="stat"><div class="k">Target</div><div class="v">'+money(d.mandate.target)+'</div></div>'+
      '<div class="stat"><div class="k">Walk</div><div class="v">'+money(d.mandate.walk)+'</div></div></div>':'';
+  const resale=(SELL_STAGES.includes(d.stage)||d.list_price!=null||d.sold_price!=null)
+    ?'<div class="lbl">Resale</div><div class="statrow">'+
+      '<div class="stat"><div class="k">List price</div><div class="v">'+money(d.list_price)+'</div></div>'+
+      (d.sold_price!=null?'<div class="stat"><div class="k">Sold</div><div class="v">'+money(d.sold_price)+'</div></div>':'')+
+      (d.realized_profit!=null?'<div class="stat"><div class="k">Profit</div><div class="v '+(d.realized_profit<0?"neg":"pos")+'">'+money(d.realized_profit)+'</div></div>':'')+
+      '</div>'+
+      (d.resale_channel?'<div class="note" style="margin-top:8px">Channel: <b>'+esc(d.resale_channel)+'</b>'+(d.listed_date?' · listed '+esc(d.listed_date):'')+'</div>':'')
+    :'';
   m.innerHTML=
     '<div class="modal-head"><button class="x" onclick="closeModal()">×</button>'+
       '<h3>'+esc(d.title)+'</h3>'+
@@ -306,6 +319,7 @@ function openModal(d){
       (man?'<div class="lbl">Mandate</div>'+man:'')+
       (d.condition_risk?'<div class="lbl">Condition · risk</div><div class="risk">'+esc(d.condition_risk)+'</div>':'')+
       (d.notes?'<div class="lbl">Notes</div><div class="note">'+esc(d.notes)+'</div>':'')+
+      resale+
       '<div class="lbl">Conversation</div>'+conv+
     '</div>';
   document.getElementById("overlay").classList.add("on");
